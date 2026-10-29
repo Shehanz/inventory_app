@@ -4,14 +4,14 @@ import {
   LayoutDashboard, Package, Tags, ArrowDownUp,
   Search, Plus, Bell, Settings, Menu, Boxes,
   AlertTriangle, TrendingUp, MoreHorizontal,
-  Pencil, Trash2, X
+  Pencil, Trash2, X, LogOut
 } from 'lucide-react'
 
 import './App.css'
 
 const API_URL = 'http://localhost:3000'
 
-function App() {
+function Dashboard({ user, onLogout }) {
   const [activeMenu, setActiveMenu] = useState('Dashboard')
   const [barang, setBarang] = useState([])
   const [kategori, setKategori] = useState([])
@@ -35,10 +35,16 @@ function App() {
     setError('')
 
     try {
+
       const [barangRes, kategoriRes] = await Promise.all([
-        fetch(`${API_URL}/api/barang`),
-        fetch(`${API_URL}/api/kategori`),
+        fetch(`${API_URL}/api/barang`, {
+          credentials: 'include',
+        }),
+        fetch(`${API_URL}/api/kategori`, {
+          credentials: 'include',
+        }),
       ])
+
 
       if (!barangRes.ok || !kategoriRes.ok) {
         throw new Error('Gagal mengambil data dari server.')
@@ -114,6 +120,7 @@ function App() {
 
       const response = await fetch(url, {
         method: editingId ? 'PUT' : 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...form,
@@ -145,10 +152,15 @@ function App() {
     if (!yakin) return
 
     try {
+
       const response = await fetch(
         `${API_URL}/api/barang/${item.id_barang}`,
-        { method: 'DELETE' }
+        {
+          method: 'DELETE',
+          credentials: 'include',
+        }
       )
+
 
       const result = await response.json()
       if (!response.ok) throw new Error(result.message || 'Gagal menghapus.')
@@ -212,16 +224,30 @@ function App() {
             <Settings size={19} />
             <span>Pengaturan</span>
           </button>
+
+          <button
+            type="button"
+            className="nav-item logout-button"
+            onClick={onLogout}
+            title="Logout"
+          >
+            <LogOut size={19} />
+            <span>Logout</span>
+          </button>
+
           <div className="profile">
             <div className="avatar">AD</div>
             <div className="profile-info">
-              <strong>Administrator</strong>
-              <span>Admin Inventaris</span>
+              <strong>{user?.nama || 'Administrator'}</strong>
+              <span>
+                {user?.role === 'admin' ? 'Admin Inventaris' : 'Staff Inventaris'}
+              </span>
             </div>
             <MoreHorizontal size={19} />
           </div>
         </div>
       </aside>
+
 
       <main className="main-content">
         <header className="topbar">
@@ -436,25 +462,25 @@ function App() {
 
             <div className="form-grid">
               <label>Kode Barang
-                <input required maxLength="30" value={form.kode_barang} onChange={e => setForm({...form, kode_barang: e.target.value})} placeholder="BRG-001" />
+                <input required maxLength="30" value={form.kode_barang} onChange={e => setForm({ ...form, kode_barang: e.target.value })} placeholder="BRG-001" />
               </label>
               <label>Nama Barang
-                <input required maxLength="150" value={form.nama_barang} onChange={e => setForm({...form, nama_barang: e.target.value})} placeholder="Nama barang" />
+                <input required maxLength="150" value={form.nama_barang} onChange={e => setForm({ ...form, nama_barang: e.target.value })} placeholder="Nama barang" />
               </label>
               <label>Kategori
-                <select value={form.id_kategori} onChange={e => setForm({...form, id_kategori: e.target.value})}>
+                <select value={form.id_kategori} onChange={e => setForm({ ...form, id_kategori: e.target.value })}>
                   <option value="">Tanpa kategori</option>
                   {kategori.map(k => <option key={k.id_kategori} value={k.id_kategori}>{k.nama_kategori}</option>)}
                 </select>
               </label>
               <label>Satuan
-                <input required maxLength="30" value={form.satuan} onChange={e => setForm({...form, satuan: e.target.value})} placeholder="pcs" />
+                <input required maxLength="30" value={form.satuan} onChange={e => setForm({ ...form, satuan: e.target.value })} placeholder="pcs" />
               </label>
               <label>Stok
-                <input required type="number" min="0" step="1" value={form.stok} onChange={e => setForm({...form, stok: e.target.value})} />
+                <input required type="number" min="0" step="1" value={form.stok} onChange={e => setForm({ ...form, stok: e.target.value })} />
               </label>
               <label>Harga Satuan (Rp)
-                <input required type="number" min="0" step="0.01" value={form.harga} onChange={e => setForm({...form, harga: e.target.value})} />
+                <input required type="number" min="0" step="0.01" value={form.harga} onChange={e => setForm({ ...form, harga: e.target.value })} />
               </label>
             </div>
 
@@ -484,4 +510,4 @@ function StatCard({ label, value, note, icon: Icon, tone }) {
   )
 }
 
-export default App
+export default Dashboard

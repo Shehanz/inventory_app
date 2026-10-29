@@ -195,3 +195,12 @@ tbody tr:hover { background: #fbfcff; }
   .form-grid { grid-template-columns: 1fr; }
   .modal-card { padding: 19px; }
 }
+
+.logout-button {
+  color: #dc2626;
+}
+
+.logout-button:hover {
+  color: #b91c1c;
+  background: #fef2f2;
+}
