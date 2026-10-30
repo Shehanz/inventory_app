@@ -41,8 +41,13 @@ export default function App() {
     };
   }, []);
 
-
   async function handleLogout() {
+    const yakin = window.confirm(
+      'Apakah kamu yakin ingin logout dari Stockwise?'
+    );
+
+    if (!yakin) return;
+
     try {
       const response = await fetch(`${API}/auth/logout`, {
         method: 'POST',
@@ -50,15 +55,15 @@ export default function App() {
       });
 
       if (!response.ok) {
-        console.error('Logout gagal di server.');
+        throw new Error('Logout gagal. Silakan coba lagi.');
       }
+
+      setUser(null);
     } catch (error) {
       console.error('Logout error:', error);
-    } finally {
-      setUser(null);
+      window.alert(error.message || 'Terjadi kesalahan saat logout.');
     }
   }
-
 
   if (checkingSession) {
     return (
@@ -72,5 +77,10 @@ export default function App() {
     return <Login onLogin={setUser} />;
   }
 
-  return <Dashboard />;
+  return (
+    <Dashboard
+      user={user}
+      onLogout={handleLogout}
+    />
+  );
 }
